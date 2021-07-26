@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: etcd0
+  namespace: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: etcd-operator
+  serviceName: etcd-client
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+      - name: app
+        image: ccr.ccs.tencentyun.com/cdb.khaos.platform/etcd:v3.4.13
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /data
+          name: etcd-volume
+        command:
+          - /usr/local/bin/etcd
+          - --data-dir
+          - /data/etcd_data
+          - --auto-compaction-retention
+          - '1'
+          - --quota-backend-bytes
+          - '8589934592'
+          - --listen-client-urls
+          - http://0.0.0.0:2379
+          - --advertise-client-urls
+          - http://etcd0-0.etcd:2379
+          - --listen-peer-urls
+          - http://0.0.0.0:2380
+          - --initial-advertise-peer-urls
+          - http://etcd0-0.etcd:2380
+          - --initial-cluster-token
+          - etcd-cluster
+          - --initial-cluster
+          - etcd0=http://etcd0-0.etcd:2380,etcd1=http://etcd1-0.etcd:2380,etcd2=http://etcd2-0.etcd:2380
+          - --initial-cluster-state
+          - new
+          - --enable-pprof
+          - --election-timeout
+          - '5000'
+          - --heartbeat-interval
+          - '250'
+          - --name
+          - etcd0
+          - --logger
+          - zap
+      volumes:
+      - name: etcd-volume
+        hostPath:
+          path: /var/tmp
+          type: Directory
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: etcd1
+  namespace: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: etcd-operator
+  serviceName: etcd-client
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+        - name: app
+          image: ccr.ccs.tencentyun.com/cdb.khaos.platform/etcd:v3.4.13
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /data
+              name: etcd-volume
+          command:
+            - /usr/local/bin/etcd
+            - --data-dir
+            - /data/etcd_data
+            - --auto-compaction-retention
+            - '1'
+            - --quota-backend-bytes
+            - '8589934592'
+            - --listen-client-urls
+            - http://0.0.0.0:2379
+            - --advertise-client-urls
+            - http://etcd1-0.etcd:2379
+            - --listen-peer-urls
+            - http://0.0.0.0:2380
+            - --initial-advertise-peer-urls
+            - http://etcd1-0.etcd:2380
+            - --initial-cluster-token
+            - etcd-cluster
+            - --initial-cluster
+            - etcd0=http://etcd0-0.etcd:2380,etcd1=http://etcd1-0.etcd:2380,etcd2=http://etcd2-0.etcd:2380
+            - --initial-cluster-state
+            - new
+            - --enable-pprof
+            - --election-timeout
+            - '5000'
+            - --heartbeat-interval
+            - '250'
+            - --name
+            - etcd1
+            - --logger
+            - zap
+      volumes:
+        - name: etcd-volume
+          hostPath:
+            path: /var/tmp
+            type: Directory
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: etcd2
+  namespace: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: etcd-operator
+  serviceName: etcd-client
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+        - name: app
+          image: ccr.ccs.tencentyun.com/cdb.khaos.platform/etcd:v3.4.13
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /data
+              name: etcd-volume
+          command:
+            - /usr/local/bin/etcd
+            - --data-dir
+            - /data/etcd_data
+            - --auto-compaction-retention
+            - '1'
+            - --quota-backend-bytes
+            - '8589934592'
+            - --listen-client-urls
+            - http://0.0.0.0:2379
+            - --advertise-client-urls
+            - http://etcd2-0.etcd:2379
+            - --listen-peer-urls
+            - http://0.0.0.0:2380
+            - --initial-advertise-peer-urls
+            - http://etcd2-0.etcd:2380
+            - --initial-cluster-token
+            - etcd-cluster
+            - --initial-cluster
+            - etcd0=http://etcd0-0.etcd:2380,etcd1=http://etcd1-0.etcd:2380,etcd2=http://etcd2-0.etcd:2380
+            - --initial-cluster-state
+            - new
+            - --enable-pprof
+            - --election-timeout
+            - '5000'
+            - --heartbeat-interval
+            - '250'
+            - --name
+            - etcd2
+            - --logger
+            - zap
+      volumes:
+        - name: etcd-volume
+          hostPath:
+            path: /var/tmp
+            type: Directory

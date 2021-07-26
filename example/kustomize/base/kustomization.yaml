@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: etcd
+
+resources:
+- etcd-cluster.yaml
+- etcd-namespace.yaml
+- etcd-nodeport-service.yaml
