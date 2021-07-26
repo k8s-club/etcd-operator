@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: ccr.ccs.tencentyun.com/cdb.khaos.platform/etcd:v3.4.13
+        image: astraw99/etcd:v3.4.13
         imagePullPolicy: Always
         volumeMounts:
         - mountPath: /data
@@ -76,7 +76,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ccr.ccs.tencentyun.com/cdb.khaos.platform/etcd:v3.4.13
+          image: astraw99/etcd:v3.4.13
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /data
@@ -136,7 +136,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ccr.ccs.tencentyun.com/cdb.khaos.platform/etcd:v3.4.13
+          image: astraw99/etcd:v3.4.13
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /data
