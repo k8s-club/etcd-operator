@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       name: etcd-operator
-  serviceName: etcd-client
+  serviceName: etcd
   template:
     metadata:
       labels:
@@ -19,7 +19,7 @@ spec:
         image: astraw99/etcd:v3.4.13
         imagePullPolicy: Always
         volumeMounts:
-        - mountPath: /data
+        - mountPath: /data/etcd0
           name: etcd-volume
         command:
           - /usr/local/bin/etcd
@@ -68,7 +68,7 @@ spec:
   selector:
     matchLabels:
       name: etcd-operator
-  serviceName: etcd-client
+  serviceName: etcd
   template:
     metadata:
       labels:
@@ -79,7 +79,7 @@ spec:
           image: astraw99/etcd:v3.4.13
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /data
+            - mountPath: /data/etcd1
               name: etcd-volume
           command:
             - /usr/local/bin/etcd
@@ -128,7 +128,7 @@ spec:
   selector:
     matchLabels:
       name: etcd-operator
-  serviceName: etcd-client
+  serviceName: etcd
   template:
     metadata:
       labels:
@@ -139,7 +139,7 @@ spec:
           image: astraw99/etcd:v3.4.13
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /data
+            - mountPath: /data/etcd2
               name: etcd-volume
           command:
             - /usr/local/bin/etcd

@@ -6,4 +6,4 @@ namespace: etcd
 resources:
 - etcd-cluster.yaml
 - etcd-namespace.yaml
-- etcd-nodeport-service.yaml
+- etcd-service.yaml
