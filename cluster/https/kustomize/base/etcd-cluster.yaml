@@ -1,0 +1,251 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  labels:
+    name: etcd-operator
+  name: etcd
+  namespace: etcd
+spec:
+  clusterIP: None
+  ports:
+  - name: client
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+  - name: peer
+    port: 2380
+    protocol: TCP
+    targetPort: 2380
+  publishNotReadyAddresses: true
+  selector:
+    name: etcd-operator
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    name: etcd-operator
+  name: etcd0
+  namespace: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: etcd-operator
+  serviceName: etcd
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+      - command:
+        - /usr/local/bin/etcd
+        - --data-dir
+        - /data/etcd_data
+        - --auto-compaction-retention
+        - "1"
+        - --quota-backend-bytes
+        - "8589934592"
+        - --listen-client-urls
+        - https://0.0.0.0:2379
+        - --advertise-client-urls
+        - https://etcd0-0.etcd:2379
+        - --listen-peer-urls
+        - https://0.0.0.0:2380
+        - --initial-advertise-peer-urls
+        - https://etcd0-0.etcd:2380
+        - --initial-cluster-token
+        - etcd-cluster
+        - --initial-cluster
+        - etcd0=https://etcd0-0.etcd:2380,etcd1=https://etcd1-0.etcd:2380,etcd2=https://etcd2-0.etcd:2380
+        - --initial-cluster-state
+        - new
+        - --enable-pprof
+        - --election-timeout
+        - "5000"
+        - --heartbeat-interval
+        - "250"
+        - --name
+        - etcd0
+        - --logger
+        - zap
+        - --cert-file=/etc/etcd/ssl/etcd.pem
+        - --key-file=/etc/etcd/ssl/etcd-key.pem
+        - --trusted-ca-file=/etc/etcd/ssl/ca.pem
+        - --peer-cert-file=/etc/etcd/ssl/etcd.pem
+        - --peer-key-file=/etc/etcd/ssl/etcd-key.pem
+        - --peer-trusted-ca-file=/etc/etcd/ssl/ca.pem
+        - --peer-client-cert-auth
+        - --client-cert-auth
+        image: astraw99/etcd:v3.4.13
+        imagePullPolicy: Always
+        name: app
+        volumeMounts:
+        - name: etcd-volume
+          mountPath: /data/etcd0
+        - name: config
+          mountPath: /etc/etcd/ssl
+      volumes:
+      - hostPath:
+          path: /var/tmp
+          type: Directory
+        name: etcd-volume
+      - name: config
+        configMap:
+          name: etcd-config
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    name: etcd-operator
+  name: etcd1
+  namespace: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: etcd-operator
+  serviceName: etcd
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+      - command:
+        - /usr/local/bin/etcd
+        - --data-dir
+        - /data/etcd_data
+        - --auto-compaction-retention
+        - "1"
+        - --quota-backend-bytes
+        - "8589934592"
+        - --listen-client-urls
+        - https://0.0.0.0:2379
+        - --advertise-client-urls
+        - https://etcd1-0.etcd:2379
+        - --listen-peer-urls
+        - https://0.0.0.0:2380
+        - --initial-advertise-peer-urls
+        - https://etcd1-0.etcd:2380
+        - --initial-cluster-token
+        - etcd-cluster
+        - --initial-cluster
+        - etcd0=https://etcd0-0.etcd:2380,etcd1=https://etcd1-0.etcd:2380,etcd2=https://etcd2-0.etcd:2380
+        - --initial-cluster-state
+        - new
+        - --enable-pprof
+        - --election-timeout
+        - "5000"
+        - --heartbeat-interval
+        - "250"
+        - --name
+        - etcd1
+        - --logger
+        - zap
+        - --cert-file=/etc/etcd/ssl/etcd.pem
+        - --key-file=/etc/etcd/ssl/etcd-key.pem
+        - --trusted-ca-file=/etc/etcd/ssl/ca.pem
+        - --peer-cert-file=/etc/etcd/ssl/etcd.pem
+        - --peer-key-file=/etc/etcd/ssl/etcd-key.pem
+        - --peer-trusted-ca-file=/etc/etcd/ssl/ca.pem
+        - --peer-client-cert-auth
+        - --client-cert-auth
+        image: astraw99/etcd:v3.4.13
+        imagePullPolicy: Always
+        name: app
+        volumeMounts:
+        - name: etcd-volume
+          mountPath: /data/etcd1
+        - name: config
+          mountPath: /etc/etcd/ssl
+      volumes:
+      - hostPath:
+          path: /var/tmp
+          type: Directory
+        name: etcd-volume
+      - name: config
+        configMap:
+          name: etcd-config
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    name: etcd-operator
+  name: etcd2
+  namespace: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: etcd-operator
+  serviceName: etcd
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+      - command:
+        - /usr/local/bin/etcd
+        - --data-dir
+        - /data/etcd_data
+        - --auto-compaction-retention
+        - "1"
+        - --quota-backend-bytes
+        - "8589934592"
+        - --listen-client-urls
+        - https://0.0.0.0:2379
+        - --advertise-client-urls
+        - https://etcd2-0.etcd:2379
+        - --listen-peer-urls
+        - https://0.0.0.0:2380
+        - --initial-advertise-peer-urls
+        - https://etcd2-0.etcd:2380
+        - --initial-cluster-token
+        - etcd-cluster
+        - --initial-cluster
+        - etcd0=https://etcd0-0.etcd:2380,etcd1=https://etcd1-0.etcd:2380,etcd2=https://etcd2-0.etcd:2380
+        - --initial-cluster-state
+        - new
+        - --enable-pprof
+        - --election-timeout
+        - "5000"
+        - --heartbeat-interval
+        - "250"
+        - --name
+        - etcd2
+        - --logger
+        - zap
+        - --cert-file=/etc/etcd/ssl/etcd.pem
+        - --key-file=/etc/etcd/ssl/etcd-key.pem
+        - --trusted-ca-file=/etc/etcd/ssl/ca.pem
+        - --peer-cert-file=/etc/etcd/ssl/etcd.pem
+        - --peer-key-file=/etc/etcd/ssl/etcd-key.pem
+        - --peer-trusted-ca-file=/etc/etcd/ssl/ca.pem
+        - --peer-client-cert-auth
+        - --client-cert-auth
+        image: astraw99/etcd:v3.4.13
+        imagePullPolicy: Always
+        name: app
+        volumeMounts:
+        - name: etcd-volume
+          mountPath: /data/etcd2
+        - name: config
+          mountPath: /etc/etcd/ssl
+      volumes:
+      - hostPath:
+          path: /var/tmp
+          type: Directory
+        name: etcd-volume
+      - name: config
+        configMap:
+          name: etcd-config
+
