@@ -110,6 +110,9 @@ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=etcd
 
 => 会生成：etcd-key.pem, etcd.csr, etcd.pem
 
+
+mv etcd.pem etcd-server.pem
+mv etcd-key.pem etcd-server-key.pem
 ```
 
 ## 6. 创建 etcd cluster
@@ -143,7 +146,7 @@ Address: 9.165.x.x
 ```
 kubectl exec -it -n etcd etcd0-0 -- sh
 
-/usr/local/bin/etcdctl --write-out=table --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd.pem --key=/etc/etcd/ssl/etcd-key.pem --endpoints=https://etcd0-0.etcd:2379,https://etcd1-0.etcd:2379,https://etcd2-0.etcd:2379 endpoint health
+/usr/local/bin/etcdctl --write-out=table --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd-server.pem --key=/etc/etcd/ssl/etcd-server-key.pem --endpoints=https://etcd0-0.etcd:2379,https://etcd1-0.etcd:2379,https://etcd2-0.etcd:2379 endpoint health
 
 +---------------------------+--------+-------------+-------+
 |         ENDPOINT          | HEALTH |    TOOK     | ERROR |
@@ -153,7 +156,7 @@ kubectl exec -it -n etcd etcd0-0 -- sh
 | https://etcd2-0.etcd:2379 |   true | 23.119639ms |       |
 +---------------------------+--------+-------------+-------+
 
-/usr/local/bin/etcdctl --write-out=table --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd.pem --key=/etc/etcd/ssl/etcd-key.pem --endpoints=https://etcd0-0.etcd:2379,https://etcd1-0.etcd:2379,https://etcd2-0.etcd:2379 endpoint status
+/usr/local/bin/etcdctl --write-out=table --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd-server.pem --key=/etc/etcd/ssl/etcd-server-key.pem --endpoints=https://etcd0-0.etcd:2379,https://etcd1-0.etcd:2379,https://etcd2-0.etcd:2379 endpoint status
 
 +--------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 |         ENDPOINT         |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
@@ -169,19 +172,19 @@ kubectl exec -it -n etcd etcd0-0 -- sh
 ```
 kubectl exec -it -n etcd etcd0-0 -- sh
 
-/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd.pem --key=/etc/etcd/ssl/etcd-key.pem put hello world
+/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd-server.pem --key=/etc/etcd/ssl/etcd-server-key.pem put hello world
 OK
 
-/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd.pem --key=/etc/etcd/ssl/etcd-key.pem get hello
+/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd-server.pem --key=/etc/etcd/ssl/etcd-server-key.pem get hello
 hello
 world
 
 查看所有 keys:
-/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd.pem --key=/etc/etcd/ssl/etcd-key.pem get "" --keys-only --prefix
+/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd-server.pem --key=/etc/etcd/ssl/etcd-server-key.pem get "" --keys-only --prefix
 hello
 
 查看所有 key-val:
-/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd.pem --key=/etc/etcd/ssl/etcd-key.pem get "" --prefix
+/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd-server.pem --key=/etc/etcd/ssl/etcd-server-key.pem get "" --prefix
 hello
 world
 
@@ -218,20 +221,26 @@ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=etcd
 
 => 会生成：apiserver-key.pem, apiserver.csr, apiserver.pem
 
+
+mv apiserver.pem etcd-client-apiserver.pem
+mv apiserver-key.pem etcd-client-apiserver-key.pem
 ```
 
 ## 12. 创建 extension-apiserver
 
 apiserver.yaml：通过 `ConfigMap` 将生成的 *.pem 证书挂载给 apiserver 使用
 
+
 ```
+...
 containers:
-  - image: xxxxx:latest
+  - image: apiserver.xxxxx:latest
     args:
     - --etcd-servers=https://etcd0-0.etcd:2379
-    - --etcd-cafile=/etc/kubernetes/certs/kube-apiserver-etcd-ca.crt
-    - --etcd-certfile=/etc/kubernetes/certs/kube-apiserver-etcd-client.crt
-    - --etcd-keyfile=/etc/kubernetes/certs/kube-apiserver-etcd-client.key
+    - --etcd-cafile=/etc/kubernetes/certs/ca.pem
+    - --etcd-certfile=/etc/kubernetes/certs/etcd-client-apiserver.pem
+    - --etcd-keyfile=/etc/kubernetes/certs/etcd-client-apiserver-key.pem
+...
 ```
 
 ```
@@ -302,7 +311,7 @@ Error: context deadline exceeded
 解决：etcdctl 需要带证书访问
 
 ```
-/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd.pem --key=/etc/etcd/ssl/etcd-key.pem put hello world
+/usr/local/bin/etcdctl --cacert=/etc/etcd/ssl/ca.pem --cert=/etc/etcd/ssl/etcd-server.pem --key=/etc/etcd/ssl/etcd-server-key.pem put hello world
 ```
 
 ### 13.5 http 与 https 之间不能切换
